@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+deepface
+opencv-python
+opencv-contrib-python
+numpy
+mysql-connector-python
+tf-keras
+mtcnn
+python-dotenv
+gunicorn
+lz4

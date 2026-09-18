@@ -1,0 +1,10 @@
+node_modules/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+.venv/
+temp-ui-repo/
+temp_doc.txt
+

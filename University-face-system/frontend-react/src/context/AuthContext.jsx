@@ -32,9 +32,17 @@ export const AuthProvider = ({ children }) => {
             const response = await api.post('/auth/signin', { email, password });
             const { accessToken, refreshToken, user: userData } = response.data.data;
             
-            const storage = rememberMe ? localStorage : sessionStorage;
-            storage.setItem('access_token', accessToken);
-            storage.setItem('refresh_token', refreshToken);
+            if (rememberMe) {
+                localStorage.setItem('access_token', accessToken);
+                localStorage.setItem('refresh_token', refreshToken);
+                sessionStorage.removeItem('access_token');
+                sessionStorage.removeItem('refresh_token');
+            } else {
+                sessionStorage.setItem('access_token', accessToken);
+                sessionStorage.setItem('refresh_token', refreshToken);
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+            }
             
             setUser(userData);
             return { success: true };
@@ -102,8 +110,28 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const faceLogin = async (image_base64) => {
+        try {
+            const response = await api.post('/auth/face-login', { image_base64 });
+            const { accessToken, refreshToken, user: userData } = response.data.data;
+
+            // Face login always uses sessionStorage (no remember me)
+            sessionStorage.setItem('access_token', accessToken);
+            sessionStorage.setItem('refresh_token', refreshToken);
+
+            setUser(userData);
+            return { success: true, data: response.data };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Không nhận diện được khuôn mặt',
+                confidence: error.response?.data?.confidence || 0,
+            };
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, login, logout, register, forgotPassword, verifyForgotPassword, resetPassword, loading }}>
+        <AuthContext.Provider value={{ user, login, faceLogin, logout, register, forgotPassword, verifyForgotPassword, resetPassword, loading }}>
             {children}
         </AuthContext.Provider>
     );

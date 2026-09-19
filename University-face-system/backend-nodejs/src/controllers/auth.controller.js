@@ -1,4 +1,7 @@
 const authService = require("../services/auth.service");
+const axios = require("axios");
+
+const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://ai_service:8000";
 
 const signup = async (req, res, next) => {
     try {
@@ -132,11 +135,68 @@ const getMe = async (req, res, next) => {
     }
 };
 
+const faceLogin = async (req, res, next) => {
+    try {
+        const { image_base64 } = req.body;
+        if (!image_base64) {
+            return res.status(400).json({ success: false, message: "Vui lòng cung cấp ảnh khuôn mặt" });
+        }
+
+        // Call Python AI service to identify face
+        const aiResponse = await axios.post(`${AI_SERVICE_URL}/api/v1/admin/identify`, {
+            image_base64,
+        });
+
+        const aiData = aiResponse.data;
+
+        if (!aiData.match || !aiData.admin_id) {
+            return res.status(401).json({
+                success: false,
+                message: "Không nhận diện được khuôn mặt. Vui lòng thử lại.",
+                confidence: aiData.confidence || 0,
+            });
+        }
+
+        // Generate JWT for the identified admin
+        const result = await authService.signinByFace(aiData.admin_id);
+
+        res.status(200).json({
+            success: true,
+            message: `Xác nhận khuôn mặt thành công`,
+            data: result,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const registerAdminFace = async (req, res, next) => {
+    try {
+        const { image_straight, image_left, image_right } = req.body;
+        const adminId = req.user.sub;
+
+        if (!image_straight || !image_left || !image_right) {
+            return res.status(400).json({ success: false, message: "Cần ảnh cả 3 góc: thẳng, trái, phải" });
+        }
+
+        await authService.registerAdminFace(adminId, image_straight, image_left, image_right);
+
+        res.status(200).json({
+            success: true,
+            message: "Đăng ký khuôn mặt thành công",
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     signup,
     resendVerificationEmail,
     verifyEmail,
     signin,
+    faceLogin,
+    registerAdminFace,
     refreshToken,
     signout,
     forgotPassword,

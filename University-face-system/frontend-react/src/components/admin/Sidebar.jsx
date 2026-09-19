@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Users, Settings, Home, LogOut, Camera, ScanFace } from 'lucide-react';
+import { Users, Settings, Home, LogOut, Camera, ScanFace, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const Sidebar = () => {
@@ -10,6 +10,7 @@ const Sidebar = () => {
         { path: '/admin/dashboard', icon: Home, label: 'Bảng Điều Khiển' },
         { path: '/admin/users', icon: Users, label: 'Quản Lý Người Dùng' },
         { path: '/admin/face-registration-demo', icon: Camera, label: 'Đăng Ký Khuôn Mặt' },
+        { path: '/admin/admin-face-registration', icon: Shield, label: 'KM Admin/Giảng Viên' },
         { path: '/admin/face-recognition', icon: ScanFace, label: 'Nhận Diện Khuôn Mặt' },
         { path: '/admin/settings', icon: Settings, label: 'Cài Đặt' },
     ];

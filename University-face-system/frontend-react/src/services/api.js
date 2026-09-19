@@ -27,6 +27,11 @@ api.interceptors.response.use(
         
         // Nếu lỗi 401 và chưa thử refresh token
         if (error.response?.status === 401 && !originalRequest._retry) {
+            // Bỏ qua interceptor cho các endpoint liên quan đến auth (login, face-login,...)
+            if (originalRequest.url?.includes('/auth/')) {
+                return Promise.reject(error);
+            }
+
             originalRequest._retry = true;
             
             try {
@@ -37,20 +42,22 @@ api.interceptors.response.use(
                 
                 // Gọi API refresh token
                 const response = await axios.post('http://localhost:5000/api/auth/refresh-token', {
-                    refresh_token: refreshToken
+                    refreshToken: refreshToken
                 });
                 
-                const { access_token } = response.data;
+                const { accessToken: new_access_token, refreshToken: new_refresh_token } = response.data.data;
                 
                 // Cập nhật token mới vào storage mà user đã chọn
                 if (localStorage.getItem('refresh_token')) {
-                    localStorage.setItem('access_token', access_token);
+                    localStorage.setItem('access_token', new_access_token);
+                    localStorage.setItem('refresh_token', new_refresh_token);
                 } else {
-                    sessionStorage.setItem('access_token', access_token);
+                    sessionStorage.setItem('access_token', new_access_token);
+                    sessionStorage.setItem('refresh_token', new_refresh_token);
                 }
                 
                 // Cập nhật header và gọi lại request cũ
-                originalRequest.headers.Authorization = `Bearer ${access_token}`;
+                originalRequest.headers.Authorization = `Bearer ${new_access_token}`;
                 return api(originalRequest);
                 
             } catch (refreshError) {

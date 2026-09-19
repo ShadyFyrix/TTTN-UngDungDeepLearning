@@ -11,6 +11,7 @@ import UserManagement from './pages/admin/UserManagement';
 import Dashboard from './pages/admin/Dashboard';
 import FaceRegistration from './components/admin/FaceRegistration';
 import FaceRecognition from './components/admin/FaceRecognition';
+import AdminFaceRegistration from './components/admin/AdminFaceRegistration';
 
 // Public Face Verification UI
 const FaceVerification = () => (
@@ -49,6 +50,7 @@ function App() {
             <Route path="users" element={<UserManagement />} />
             <Route path="face-registration-demo" element={<FaceRegistration />} />
             <Route path="face-recognition" element={<FaceRecognition />} />
+            <Route path="admin-face-registration" element={<AdminFaceRegistration />} />
             {/* Add more admin routes here later (e.g., settings) */}
             <Route path="settings" element={<div className="p-8 text-center text-gray-500">Trang Cài đặt (Đang phát triển)</div>} />
           </Route>
